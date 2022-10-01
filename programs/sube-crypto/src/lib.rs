@@ -9,34 +9,35 @@ use std::str::FromStr;
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
-pub mod sube_crypto {
+pub mod bus_trip_ticket {
     use super::*;
 
     pub fn initialize_bus_line(
         ctx: Context<InitializeAdminAccount>,
-        0to3km: u64,
-        3to6km: u64,
-        6to12km: u64,
-        12to27km: u64,
+        to3km: u64,
+        to6km: u64,
+        to12km: u64,
+        to27km: u64,
         more27km: u64
     ) -> Result<()> {
-        let (services_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.user.key().as_ref()], &Pubkey::from_str("Ca8tecWTapYzeGfa8FvAMSo6JCheTRPvQhsjebZm56YE").unwrap());
-        let sube: &mut Account<SoLotery> = &mut ctx.accounts.sube;
-        sube.authority = ctx.accounts.user.key();
+        let (services_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("Ca8tecWTapYzeGfa8FvAMSo6JCheTRPvQhsjebZm56YE").unwrap());
+        let sube: &mut Account<BusAccount> = &mut ctx.accounts.sube;
+        sube.authority = ctx.accounts.signer.key();
         sube.bump_original = bump;
-        sube.prices = [0to3km, 3to6km, 6to12km, 12to27km, more27km];
+        sube.prices = [to3km, to6km, to12km, to27km, more27km].to_vec();
         Ok(())
     }
     pub fn take_a_trip(
         ctx: Context<Trip>,
-        km: u8,
+        _km: u8,
     ) -> Result<()> {
-        require!(km < 6,  Err(ErrorCode::OverdueCredits.into()));
+        let km: usize = _km as usize;
+        require!(km < 6, ErrorCode::InvalidaKilometer);
+        let transfer = system_instruction::transfer(
+            &ctx.accounts.from.key(), &ctx.accounts.to.key(), ctx.accounts.sube.prices[km],
+        );
         let from = &mut ctx.accounts.from;
         let to = &mut ctx.accounts.to;
-        let transfer = system_instruction::transfer(
-            &from_pubkey, &to_pubkey, ctx.accounts.sube.prices[km],
-        );
         if km == 0 {
             anchor_lang::solana_program::program::invoke(
                 &transfer,
@@ -78,8 +79,8 @@ pub mod sube_crypto {
 
 #[derive(Accounts)]
 pub struct InitializeAdminAccount<'info> {
-    #[account(init, seeds = [user.key().as_ref()], bump, payer = user, space = 85)]
-    pub sube: Account<'info, SubeAdminAccount>,
+    #[account(init, seeds = [signer.key().as_ref()], bump, payer = signer, space = 85)]
+    pub sube: Account<'info, BusAccount>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -87,7 +88,7 @@ pub struct InitializeAdminAccount<'info> {
 #[derive(Accounts)]
 pub struct Trip<'info> {
     #[account(mut, seeds = [sube.authority.key().as_ref()], bump = sube.bump_original)]
-    pub sube: Account<'info, SubeAdminAccount>,
+    pub sube: Account<'info, BusAccount>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut, signer)]
     pub from: AccountInfo<'info>,
@@ -97,7 +98,7 @@ pub struct Trip<'info> {
     pub system_program: Program<'info, System>,
 }
 #[account]
-pub struct SubeAdminAccount {
+pub struct BusAccount {
     pub authority: Pubkey, 
     pub bump_original: u8,
     pub prices: Vec<u64>
