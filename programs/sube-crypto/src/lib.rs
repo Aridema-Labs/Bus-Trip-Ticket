@@ -6,7 +6,7 @@ use anchor_lang::{
 }; 
 use std::str::FromStr;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("Cmyo3foHLuN7X48qiUBXdXzwz6hMjMebcQ2v3YzUKVp8");
 
 #[program]
 pub mod bus_trip_ticket {
@@ -20,11 +20,15 @@ pub mod bus_trip_ticket {
         to27km: u64,
         more27km: u64
     ) -> Result<()> {
-        let (services_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("Ca8tecWTapYzeGfa8FvAMSo6JCheTRPvQhsjebZm56YE").unwrap());
-        let sube: &mut Account<BusAccount> = &mut ctx.accounts.sube;
-        sube.authority = ctx.accounts.signer.key();
-        sube.bump_original = bump;
-        sube.prices = [to3km, to6km, to12km, to27km, more27km].to_vec();
+        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("Cmyo3foHLuN7X48qiUBXdXzwz6hMjMebcQ2v3YzUKVp8").unwrap());
+        let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
+        bus.authority = ctx.accounts.signer.key();
+        bus.bump_original = bump;
+        bus.to3km = to3km;
+        bus.to6km = to6km;
+        bus.to12km = to12km;
+        bus.to27km = to27km;
+        bus.more27km = more27km;
         Ok(())
     }
     pub fn take_a_trip(
@@ -33,8 +37,9 @@ pub mod bus_trip_ticket {
     ) -> Result<()> {
         let km: usize = _km as usize;
         require!(km < 6, ErrorCode::InvalidaKilometer);
+        let km_list = [ctx.accounts.bus.to3km,ctx.accounts.bus.to6km,ctx.accounts.bus.to12km,ctx.accounts.bus.to27km,ctx.accounts.bus.more27km].to_vec();
         let transfer = system_instruction::transfer(
-            &ctx.accounts.from.key(), &ctx.accounts.to.key(), ctx.accounts.sube.prices[km],
+            &ctx.accounts.from.key(), &ctx.accounts.to.key(), km_list[km],
         );
         let from = &mut ctx.accounts.from;
         let to = &mut ctx.accounts.to;
@@ -80,15 +85,15 @@ pub mod bus_trip_ticket {
 #[derive(Accounts)]
 pub struct InitializeAdminAccount<'info> {
     #[account(init, seeds = [signer.key().as_ref()], bump, payer = signer, space = 85)]
-    pub sube: Account<'info, BusAccount>,
+    pub bus: Account<'info, BusAccount>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
 pub struct Trip<'info> {
-    #[account(mut, seeds = [sube.authority.key().as_ref()], bump = sube.bump_original)]
-    pub sube: Account<'info, BusAccount>,
+    #[account(mut, seeds = [bus.authority.key().as_ref()], bump = bus.bump_original)]
+    pub bus: Account<'info, BusAccount>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut, signer)]
     pub from: AccountInfo<'info>,
@@ -101,7 +106,11 @@ pub struct Trip<'info> {
 pub struct BusAccount {
     pub authority: Pubkey, 
     pub bump_original: u8,
-    pub prices: Vec<u64>
+    pub to3km: u64,
+    pub to6km: u64,
+    pub to12km: u64,
+    pub to27km: u64,
+    pub more27km: u64
 }
 #[error_code]
 pub enum ErrorCode {

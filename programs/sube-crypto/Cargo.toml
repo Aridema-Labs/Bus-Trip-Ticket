@@ -1,12 +1,12 @@
 [package]
-name = "sube-crypto"
+name = "bus_trip_ticket"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "sube_crypto"
+name = "bus_trip_ticket"
 
 [features]
 no-entrypoint = []
