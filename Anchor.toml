@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.devnet]
-bus_trip_ticket = "Cmyo3foHLuN7X48qiUBXdXzwz6hMjMebcQ2v3YzUKVp8"
+bus_trip_ticket = "3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw"
 
 [registry]
 url = "https://api.apr.dev"
@@ -13,3 +13,6 @@ wallet = "/home/mateo/.config/solana/id.json"
 
 [scripts]
 register = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/Bus/RegisterBus.ts"
+check = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/CheckIt.ts"
+ticket = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/TakeATrip.ts"
+change_prices = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/Bus/ChangePrices.ts"

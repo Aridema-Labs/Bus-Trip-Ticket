@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
-import { PublicKey} from '@solana/web3.js'
+import { BusLine } from "../Accounts"
 
 describe("Register a Bus Line", () => {
   const provider = anchor.AnchorProvider.env();
@@ -8,28 +8,7 @@ describe("Register a Bus Line", () => {
   const program = anchor.workspace.BusTripTicket as anchor.Program<BusTripTicket>
 
   it("Is initialized!", async () => {
-    const [BusLine, _bump] = await PublicKey.findProgramAddress(
-      [
-        provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    )
-    const tx = await program.methods.initializeBusLine(
-      new anchor.BN(1785714),
-      new anchor.BN(2000000),
-      new anchor.BN(2100000),
-      new anchor.BN(2200000),
-      new anchor.BN(2300000)
-    )
-    .accounts({
-      bus: BusLine,
-      signer: provider.wallet.publicKey,
-      systemProgram: anchor.web3.SystemProgram.programId
-    })
-    .rpc();
     const Account = await program.account.busAccount.fetch(BusLine);
-    console.log("----------------------------------------------")
-    console.log("Your transaction signature", tx);
     console.log("----------------------------------------------")
     console.log("PDA: ", BusLine.toBase58())
     console.log("----------------------------------------------")

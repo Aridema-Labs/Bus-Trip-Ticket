@@ -1,29 +1,32 @@
 import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
-import { SubeCrypto } from "../target/types/sube_crypto";
-import { PublicKey} from '@solana/web3.js'
+import { BusTripTicket } from "../../target/types/bus_trip_ticket";
+import { BusLine } from "../Accounts"
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-describe("sube-crypto", () => {
+describe("Take a Trip", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const program = anchor.workspace.SubeCrypto as Program<SubeCrypto>;
+  const program = anchor.workspace.BusTripTicket as anchor.Program<BusTripTicket>
 
-  it("Is initialized!", async () => {
-    const [BusLine, _bump] = await PublicKey.findProgramAddress(
-      [
-        provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    )
-    const Account = await program.account.unsafehold.fetch(BusLine);
-    const tx = await program.methods.takeATrip(6)
-    .accounts(
-      sube: BusLine,
+  it("Buying Ticket", async () => {
+    let balance = await provider.connection.getBalance(provider.wallet.publicKey);
+    const Account = await program.account.busAccount.fetch(BusLine);
+    const tx = await program.methods.takeATrip(0)
+    .accounts({
+      bus: BusLine,
       from: provider.wallet.publicKey,
       to: Account.authority,
-      systemProgram: anchor.web3.SystemProgram.programId
-    )
+      systemProgram: anchor.web3.SystemProgram.programId,
+  })
     .rpc();
+    console.log("----------------------------------------------")
     console.log("Your transaction signature", tx);
+    console.log("----------------------------------------------")
+    console.log("Bus: ", BusLine.toBase58())
+    //console.log("----------------------------------------------")
+    //console.log("Ticket price: ", await provider.connection.)
+    console.log("----------------------------------------------")
+    console.log("Your Balance: ", (balance / LAMPORTS_PER_SOL).toString())
+    console.log("----------------------------------------------")
   });
 });

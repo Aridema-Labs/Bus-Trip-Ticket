@@ -6,7 +6,7 @@ use anchor_lang::{
 }; 
 use std::str::FromStr;
 
-declare_id!("Cmyo3foHLuN7X48qiUBXdXzwz6hMjMebcQ2v3YzUKVp8");
+declare_id!("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw");
 
 #[program]
 pub mod bus_trip_ticket {
@@ -14,21 +14,21 @@ pub mod bus_trip_ticket {
 
     pub fn initialize_bus_line(
         ctx: Context<InitializeAdminAccount>,
-        to3km: u64,
-        to6km: u64,
-        to12km: u64,
-        to27km: u64,
-        more27km: u64
+        to_three_km: u64,
+        to_six_km: u64,
+        to_twelve_km: u64,
+        to_twenty_seven_km: u64,
+        more_twenty_seven_km: u64
     ) -> Result<()> {
-        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("Cmyo3foHLuN7X48qiUBXdXzwz6hMjMebcQ2v3YzUKVp8").unwrap());
+        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw").unwrap());
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.authority = ctx.accounts.signer.key();
         bus.bump_original = bump;
-        bus.to3km = to3km;
-        bus.to6km = to6km;
-        bus.to12km = to12km;
-        bus.to27km = to27km;
-        bus.more27km = more27km;
+        bus.to_three_km = to_three_km;
+        bus.to_six_km = to_six_km;
+        bus.to_twelve_km = to_twelve_km;
+        bus.to_twenty_seven_km = to_twenty_seven_km;
+        bus.more_twenty_seven_km = more_twenty_seven_km;
         Ok(())
     }
     pub fn take_a_trip(
@@ -37,47 +37,32 @@ pub mod bus_trip_ticket {
     ) -> Result<()> {
         let km: usize = _km as usize;
         require!(km < 6, ErrorCode::InvalidaKilometer);
-        let km_list = [ctx.accounts.bus.to3km,ctx.accounts.bus.to6km,ctx.accounts.bus.to12km,ctx.accounts.bus.to27km,ctx.accounts.bus.more27km].to_vec();
+        let km_list = [ctx.accounts.bus.to_three_km,ctx.accounts.bus.to_six_km,ctx.accounts.bus.to_twelve_km,ctx.accounts.bus.to_twenty_seven_km,ctx.accounts.bus.more_twenty_seven_km].to_vec();
         let transfer = system_instruction::transfer(
             &ctx.accounts.from.key(), &ctx.accounts.to.key(), km_list[km],
         );
-        let from = &mut ctx.accounts.from;
-        let to = &mut ctx.accounts.to;
-        if km == 0 {
-            anchor_lang::solana_program::program::invoke(
-                &transfer,
-                &[from.to_account_info(), to.to_account_info().clone()],
-            ).expect("Error");
-            msg!("Transfered Lamports");
-        }
-        if km == 1 {
-            anchor_lang::solana_program::program::invoke(
-                &transfer,
-                &[from.to_account_info(), to.to_account_info().clone()],
-            ).expect("Error");
-            msg!("Transfered Lamports");
-        }
-        if km == 5 {
-            anchor_lang::solana_program::program::invoke(
-                &transfer,
-                &[from.to_account_info(), to.to_account_info().clone()],
-            ).expect("Error");
-            msg!("Transfered Lamports");
-        }
-        if km == 6 {
-            anchor_lang::solana_program::program::invoke(
-                &transfer,
-                &[from.to_account_info(), to.to_account_info().clone()],
-            ).expect("Error");
-            msg!("Transfered Lamports");
-        }
-        if km == 7 {
-            anchor_lang::solana_program::program::invoke(
-                &transfer,
-                &[from.to_account_info(), to.to_account_info().clone()],
-            ).expect("Error");
-            msg!("Transfered Lamports");
-        }
+        anchor_lang::solana_program::program::invoke(
+            &transfer,
+            &[ctx.accounts.from.to_account_info(), ctx.accounts.to.to_account_info().clone()],
+        ).expect("Error");
+        msg!("Transfered Lamports");
+        Ok(())
+    }
+    pub fn change_prices(
+        ctx: Context<ChangePrices>,
+        to_three_km: u64,
+        to_six_km: u64,
+        to_twelve_km: u64,
+        to_twenty_seven_km: u64,
+        more_twenty_seven_km: u64
+    ) -> Result<()> {
+        require_keys_eq!(ctx.accounts.signer.key(), ctx.accounts.bus.authority.key());
+        let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
+        bus.to_three_km = to_three_km;
+        bus.to_six_km = to_six_km;
+        bus.to_twelve_km = to_twelve_km;
+        bus.to_twenty_seven_km = to_twenty_seven_km;
+        bus.more_twenty_seven_km = more_twenty_seven_km;
         Ok(())
     }
 }
@@ -102,15 +87,22 @@ pub struct Trip<'info> {
     pub to: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
+#[derive(Accounts)]
+pub struct ChangePrices<'info> {
+    #[account(mut, seeds = [bus.authority.key().as_ref()], bump = bus.bump_original)]
+    pub bus: Account<'info, BusAccount>,
+    #[account(mut)]
+    pub signer: Signer<'info>,
+}
 #[account]
 pub struct BusAccount {
     pub authority: Pubkey, 
     pub bump_original: u8,
-    pub to3km: u64,
-    pub to6km: u64,
-    pub to12km: u64,
-    pub to27km: u64,
-    pub more27km: u64
+    pub to_three_km: u64,
+    pub to_six_km: u64,
+    pub to_twelve_km: u64,
+    pub to_twenty_seven_km: u64,
+    pub more_twenty_seven_km: u64
 }
 #[error_code]
 pub enum ErrorCode {
