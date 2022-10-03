@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
-import { PublicKey} from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 
 describe("Register a Bus Line", () => {
   const provider = anchor.AnchorProvider.env();

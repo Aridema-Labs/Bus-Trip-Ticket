@@ -16,3 +16,4 @@ register = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/Bus/RegisterBu
 check = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/CheckIt.ts"
 ticket = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/TakeATrip.ts"
 change_prices = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/Bus/ChangePrices.ts"
+lines = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/BusesLines.ts"
