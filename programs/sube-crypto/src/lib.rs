@@ -31,6 +31,12 @@ pub mod bus_trip_ticket {
         bus.more_twenty_seven_km = more_twenty_seven_km;
         Ok(())
     }
+    pub fn enable_card(
+        ctx: Context<EnableCard>
+    ) -> Result<()> {
+        let (_user_card_pda, _bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw").unwrap());
+        Ok(())
+    }
     pub fn take_a_trip(
         ctx: Context<Trip>,
         _km: u8,
@@ -76,6 +82,14 @@ pub struct InitializeAdminAccount<'info> {
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
+pub struct EnableCard<'info> {
+    #[account(init, seeds = [signer.key().as_ref()], bump, payer = signer, space = 8)]
+    pub bus: Account<'info, EnableUserCard>,
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
 pub struct Trip<'info> {
     #[account(mut, seeds = [bus.authority.key().as_ref()], bump = bus.bump_original)]
     pub bus: Account<'info, BusAccount>,
@@ -104,6 +118,8 @@ pub struct BusAccount {
     pub to_twenty_seven_km: u64,
     pub more_twenty_seven_km: u64
 }
+#[account]
+pub struct EnableUserCard {}
 #[error_code]
 pub enum ErrorCode {
     #[msg("Enter a value corresponding to your route")]InvalidaKilometer
