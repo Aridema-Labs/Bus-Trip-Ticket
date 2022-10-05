@@ -6,7 +6,7 @@ use anchor_lang::{
 }; 
 use std::str::FromStr;
 
-declare_id!("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw");
+declare_id!("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN");
 
 #[program]
 pub mod bus_trip_ticket {
@@ -20,7 +20,7 @@ pub mod bus_trip_ticket {
         to_twenty_seven_km: u64,
         more_twenty_seven_km: u64
     ) -> Result<()> {
-        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw").unwrap());
+        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN").unwrap());
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.authority = ctx.accounts.signer.key();
         bus.bump_original = bump;
@@ -34,7 +34,7 @@ pub mod bus_trip_ticket {
     pub fn enable_card(
         ctx: Context<EnableCard>
     ) -> Result<()> {
-        let (_user_card_pda, _bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw").unwrap());
+        let (_user_card_pda, _bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN").unwrap());
         Ok(())
     }
     pub fn take_a_trip(
@@ -44,8 +44,16 @@ pub mod bus_trip_ticket {
         let km: usize = _km as usize;
         require!(km < 6, ErrorCode::InvalidaKilometer);
         let km_list = [ctx.accounts.bus.to_three_km,ctx.accounts.bus.to_six_km,ctx.accounts.bus.to_twelve_km,ctx.accounts.bus.to_twenty_seven_km,ctx.accounts.bus.more_twenty_seven_km].to_vec();
+        **ctx.accounts.from.to_account_info().try_borrow_mut_lamports()? -= km_list[km];
+        **ctx.accounts.to.try_borrow_mut_lamports()? += km_list[km];
+        Ok(())
+    }
+    pub fn charge_balance(
+        ctx: Context<Trip>,
+        amount: u64
+    ) -> Result<()> {
         let transfer = system_instruction::transfer(
-            &ctx.accounts.from.key(), &ctx.accounts.to.key(), km_list[km],
+            &ctx.accounts.from.key(), &ctx.accounts.to.key(), amount,
         );
         anchor_lang::solana_program::program::invoke(
             &transfer,
@@ -83,7 +91,7 @@ pub struct InitializeAdminAccount<'info> {
 }
 #[derive(Accounts)]
 pub struct EnableCard<'info> {
-    #[account(init, seeds = [signer.key().as_ref()], bump, payer = signer, space = 8)]
+    #[account(init, seeds = [b"Enable", signer.key().as_ref()], bump, payer = signer, space = 8)]
     pub bus: Account<'info, EnableUserCard>,
     #[account(mut)]
     pub signer: Signer<'info>,

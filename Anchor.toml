@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.devnet]
-bus_trip_ticket = "3SW4hFCYq1SP9U2Qq8BYFKFSpzTvsxrbHmXqKLKQ4jdw"
+bus_trip_ticket = "HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN"
 
 [registry]
 url = "https://api.apr.dev"
