@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
-import { BusLine } from "../Accounts"
+import { BusLine, Card } from "../Accounts"
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 describe("Take a Trip", () => {
@@ -14,7 +14,7 @@ describe("Take a Trip", () => {
     const tx = await program.methods.takeATrip(0)
     .accounts({
       bus: BusLine,
-      from: provider.wallet.publicKey,
+      from: Card,
       to: Account.authority,
       systemProgram: anchor.web3.SystemProgram.programId,
   })
@@ -23,8 +23,6 @@ describe("Take a Trip", () => {
     console.log("Your transaction signature", tx);
     console.log("----------------------------------------------")
     console.log("Bus: ", BusLine.toBase58())
-    //console.log("----------------------------------------------")
-    //console.log("Ticket price: ", await provider.connection.)
     console.log("----------------------------------------------")
     console.log("Your Balance: ", (balance / LAMPORTS_PER_SOL).toString())
     console.log("----------------------------------------------")

@@ -41,15 +41,15 @@ pub mod bus_trip_ticket {
         ctx: Context<Trip>,
         _km: u8,
     ) -> Result<()> {
+        let km_list = [ctx.accounts.bus.to_three_km,ctx.accounts.bus.to_six_km,ctx.accounts.bus.to_twelve_km,ctx.accounts.bus.to_twenty_seven_km,ctx.accounts.bus.more_twenty_seven_km].to_vec();
         let km: usize = _km as usize;
         require!(km < 6, ErrorCode::InvalidaKilometer);
-        let km_list = [ctx.accounts.bus.to_three_km,ctx.accounts.bus.to_six_km,ctx.accounts.bus.to_twelve_km,ctx.accounts.bus.to_twenty_seven_km,ctx.accounts.bus.more_twenty_seven_km].to_vec();
-        **ctx.accounts.from.to_account_info().try_borrow_mut_lamports()? -= km_list[km];
+        **ctx.accounts.card.to_account_info().try_borrow_mut_lamports()? -= km_list[km];
         **ctx.accounts.to.try_borrow_mut_lamports()? += km_list[km];
         Ok(())
     }
     pub fn charge_balance(
-        ctx: Context<Trip>,
+        ctx: Context<ChargeBalance>,
         amount: u64
     ) -> Result<()> {
         let transfer = system_instruction::transfer(
@@ -92,7 +92,7 @@ pub struct InitializeAdminAccount<'info> {
 #[derive(Accounts)]
 pub struct EnableCard<'info> {
     #[account(init, seeds = [b"Enable", signer.key().as_ref()], bump, payer = signer, space = 8)]
-    pub bus: Account<'info, EnableUserCard>,
+    pub card: Account<'info, EnableUserCard>,
     #[account(mut)]
     pub signer: Signer<'info>,
     pub system_program: Program<'info, System>,
@@ -101,6 +101,18 @@ pub struct EnableCard<'info> {
 pub struct Trip<'info> {
     #[account(mut, seeds = [bus.authority.key().as_ref()], bump = bus.bump_original)]
     pub bus: Account<'info, BusAccount>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut, seeds = [b"Enable", card.authority.key().as_ref()], bump = card.bump)]
+    pub card: Account<'info, EnableUserCard>,
+    #[account(mut, signer)]
+    pub from: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
+    pub to: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
+pub struct ChargeBalance<'info> {
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut, signer)]
     pub from: AccountInfo<'info>,
@@ -127,8 +139,11 @@ pub struct BusAccount {
     pub more_twenty_seven_km: u64
 }
 #[account]
-pub struct EnableUserCard {}
+pub struct EnableUserCard {
+    pub authority: Pubkey, 
+    pub bump_original: u8,
+}
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Enter a value corresponding to your route")]InvalidaKilometer
+    #[msg("Enter a value corresponding to your route")]InvalidaKilometer,
 }

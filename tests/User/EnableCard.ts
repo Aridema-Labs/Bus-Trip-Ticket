@@ -2,12 +2,12 @@ import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
 import { PublicKey } from '@solana/web3.js'
 
-describe("Register a Bus Line", () => {
+describe("Register User Card ", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.BusTripTicket as anchor.Program<BusTripTicket>
 
-  it("Is initialized!", async () => {
+  it("Registering", async () => {
     const [Card, _bump] = await PublicKey.findProgramAddress(
         [
           anchor.utils.bytes.utf8.encode("Enable"),
@@ -17,6 +17,7 @@ describe("Register a Bus Line", () => {
       )
     const tx = await program.methods.enableCard()
     .accounts({
+      card: Card,
       signer: provider.wallet.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId
     })
