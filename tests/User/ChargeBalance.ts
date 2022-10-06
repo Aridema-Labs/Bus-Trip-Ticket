@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
-import { Card } from "../Accounts"
+import { Card } from "../Accounts";
 
 describe("Sending balance", () => {
   const provider = anchor.AnchorProvider.env();
@@ -9,7 +9,7 @@ describe("Sending balance", () => {
 
   it("Balance sent", async () => {
     const tx = await program.methods.chargeBalance(
-        new anchor.BN(50000)
+        new anchor.BN(2300000)
     )
     .accounts({
       from: provider.wallet.publicKey,

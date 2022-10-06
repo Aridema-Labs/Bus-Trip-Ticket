@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { BusTripTicket } from "../../target/types/bus_trip_ticket";
 import { PublicKey } from '@solana/web3.js'
 
-describe("Register User Card ", () => {
+describe("Enabling card", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.BusTripTicket as anchor.Program<BusTripTicket>

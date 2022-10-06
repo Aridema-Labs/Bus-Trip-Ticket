@@ -14,7 +14,8 @@ describe("Take a Trip", () => {
     const tx = await program.methods.takeATrip(0)
     .accounts({
       bus: BusLine,
-      from: Card,
+      card: Card,
+      from: provider.wallet.publicKey,
       to: Account.authority,
       systemProgram: anchor.web3.SystemProgram.programId,
   })

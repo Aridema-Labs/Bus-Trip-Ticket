@@ -6,7 +6,7 @@ use anchor_lang::{
 }; 
 use std::str::FromStr;
 
-declare_id!("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN");
+declare_id!("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2");
 
 #[program]
 pub mod bus_trip_ticket {
@@ -20,7 +20,7 @@ pub mod bus_trip_ticket {
         to_twenty_seven_km: u64,
         more_twenty_seven_km: u64
     ) -> Result<()> {
-        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN").unwrap());
+        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.authority = ctx.accounts.signer.key();
         bus.bump_original = bump;
@@ -34,7 +34,10 @@ pub mod bus_trip_ticket {
     pub fn enable_card(
         ctx: Context<EnableCard>
     ) -> Result<()> {
-        let (_user_card_pda, _bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("HWnSAW1x8PDdqKVEu7qBkvrJ7PvtTwn9NqLxTtsNiRvN").unwrap());
+        let (_user_card_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
+        let card: &mut Account<EnableUserCard> = &mut ctx.accounts.card;
+        card.authority = ctx.accounts.signer.key();
+        card.bump_original = bump;
         Ok(())
     }
     pub fn take_a_trip(
@@ -44,8 +47,11 @@ pub mod bus_trip_ticket {
         let km_list = [ctx.accounts.bus.to_three_km,ctx.accounts.bus.to_six_km,ctx.accounts.bus.to_twelve_km,ctx.accounts.bus.to_twenty_seven_km,ctx.accounts.bus.more_twenty_seven_km].to_vec();
         let km: usize = _km as usize;
         require!(km < 6, ErrorCode::InvalidaKilometer);
+        require!(AccountInfo::lamports(&ctx.accounts.card.to_account_info()) > (km_list[km] + 5000), ErrorCode::InsuficientSOL);
         **ctx.accounts.card.to_account_info().try_borrow_mut_lamports()? -= km_list[km];
         **ctx.accounts.to.try_borrow_mut_lamports()? += km_list[km];
+        **ctx.accounts.card.to_account_info().try_borrow_mut_lamports()? -= 5000;
+        **ctx.accounts.from.try_borrow_mut_lamports()? += 5000;
         Ok(())
     }
     pub fn charge_balance(
@@ -91,7 +97,7 @@ pub struct InitializeAdminAccount<'info> {
 }
 #[derive(Accounts)]
 pub struct EnableCard<'info> {
-    #[account(init, seeds = [b"Enable", signer.key().as_ref()], bump, payer = signer, space = 8)]
+    #[account(init, seeds = [b"Enable", signer.key().as_ref()], bump, payer = signer, space = 41)]
     pub card: Account<'info, EnableUserCard>,
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -101,14 +107,14 @@ pub struct EnableCard<'info> {
 pub struct Trip<'info> {
     #[account(mut, seeds = [bus.authority.key().as_ref()], bump = bus.bump_original)]
     pub bus: Account<'info, BusAccount>,
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(mut, seeds = [b"Enable", card.authority.key().as_ref()], bump = card.bump)]
+    #[account(mut, seeds = [b"Enable", card.authority.key().as_ref()], bump = card.bump_original)]
     pub card: Account<'info, EnableUserCard>,
-    #[account(mut, signer)]
-    pub from: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub to: AccountInfo<'info>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut, signer)]
+    pub from: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 #[derive(Accounts)]
@@ -146,4 +152,5 @@ pub struct EnableUserCard {
 #[error_code]
 pub enum ErrorCode {
     #[msg("Enter a value corresponding to your route")]InvalidaKilometer,
+    #[msg("Insuficient SOL")]InsuficientSOL,
 }
