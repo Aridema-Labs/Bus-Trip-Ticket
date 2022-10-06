@@ -20,7 +20,8 @@ pub mod bus_trip_ticket {
         to_twenty_seven_km: u64,
         more_twenty_seven_km: u64
     ) -> Result<()> {
-        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
+        let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], 
+        &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.authority = ctx.accounts.signer.key();
         bus.bump_original = bump;
@@ -34,7 +35,8 @@ pub mod bus_trip_ticket {
     pub fn enable_card(
         ctx: Context<EnableCard>
     ) -> Result<()> {
-        let (_user_card_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
+        let (_user_card_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], 
+        &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
         let card: &mut Account<EnableUserCard> = &mut ctx.accounts.card;
         card.authority = ctx.accounts.signer.key();
         card.bump_original = bump;
