@@ -2,7 +2,7 @@
 seeds = false
 skip-lint = false
 [programs.devnet]
-bus_trip_ticket = "6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2"
+bus_trip_ticket = "CqtPfRjEWtqRR1XZq4EkfSUimCPxPiie7UcrWFJ2DxVV"
 
 [registry]
 url = "https://api.apr.dev"
@@ -19,3 +19,4 @@ change_prices = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/Bus/Chang
 lines = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/BusesLines.ts"
 enable = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/EnableCard.ts"
 balance = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/ChargeBalance.ts"
+st = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/User/UserStatistics.ts"

@@ -4,8 +4,8 @@ anchor.setProvider(provider);
 export const wallet = provider.wallet as anchor.Wallet;
 
 export const BusLine = new anchor.web3.PublicKey(
-    "44jmj26wqMZJjk2rxatUk6djb5orVTMEHnJNAc1WjWL3"
+    "AiPzHFkW4ysfvrNJ68w8NPFGmh6NJAxw2RnBY5PxGp8"
 );
 export const Card = new anchor.web3.PublicKey(
-    "4kszrEHLChhzWJe43jHsGd66enDJTsVfjcwqasXXMD9B"
+    "G4wVoLwEQiAXPNit2RPVoWisUQcJPFWvJcAHdXCFU3wN"
 );

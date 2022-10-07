@@ -6,7 +6,7 @@ use anchor_lang::{
 }; 
 use std::str::FromStr;
 
-declare_id!("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2");
+declare_id!("CqtPfRjEWtqRR1XZq4EkfSUimCPxPiie7UcrWFJ2DxVV");
 
 #[program]
 pub mod bus_trip_ticket {
@@ -21,7 +21,7 @@ pub mod bus_trip_ticket {
         more_twenty_seven_km: u64
     ) -> Result<()> {
         let (_bus_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[ctx.accounts.signer.key().as_ref()], 
-        &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
+        &Pubkey::from_str("CqtPfRjEWtqRR1XZq4EkfSUimCPxPiie7UcrWFJ2DxVV").unwrap());
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.authority = ctx.accounts.signer.key();
         bus.bump_original = bump;
@@ -36,7 +36,7 @@ pub mod bus_trip_ticket {
         ctx: Context<EnableCard>
     ) -> Result<()> {
         let (_user_card_pda, bump): (Pubkey, u8) = Pubkey::find_program_address(&[b"Enable", ctx.accounts.signer.key().as_ref()], 
-        &Pubkey::from_str("6EVqHcGnqpKBTiHcSywGRQBcb482m6G2X5si5dKU7vb2").unwrap());
+        &Pubkey::from_str("CqtPfRjEWtqRR1XZq4EkfSUimCPxPiie7UcrWFJ2DxVV").unwrap());
         let card: &mut Account<EnableUserCard> = &mut ctx.accounts.card;
         card.authority = ctx.accounts.signer.key();
         card.bump_original = bump;
