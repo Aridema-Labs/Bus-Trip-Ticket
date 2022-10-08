@@ -78,7 +78,7 @@ pub mod bus_trip_ticket {
         to_twenty_seven_km: u64,
         more_twenty_seven_km: u64
     ) -> Result<()> {
-        require_keys_eq!(ctx.accounts.signer.key(), ctx.accounts.bus.authority.key());
+        require_keys_eq!(ctx.accounts.signer.key(), ctx.accounts.bus.authority.key(), ErrorCode::AuthorityError);
         let bus: &mut Account<BusAccount> = &mut ctx.accounts.bus;
         bus.to_three_km = to_three_km;
         bus.to_six_km = to_six_km;
@@ -154,5 +154,5 @@ pub struct EnableUserCard {
 #[error_code]
 pub enum ErrorCode {
     #[msg("Enter a value corresponding to your route")]InvalidaKilometer,
-    #[msg("Insuficient SOL")]InsuficientSOL,
+    #[msg("Insuficient SOL")]InsuficientSOL, #[msg("You are not the authority")]AuthorityError,
 }
